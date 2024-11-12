@@ -1,5 +1,6 @@
 from . import addCube
 from . import deleteAll
+from . import unhide
 
 bl_info = {
     "name": "BlenderToolSet",
@@ -14,8 +15,10 @@ bl_info = {
 def register():
     addCube.register()
     deleteAll.register()
+    unhide.register()
 
 
 def unregister():
     addCube.unregister()
     deleteAll.unregister()
+    unhide.unregister()
