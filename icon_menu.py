@@ -23,6 +23,34 @@ class ICONS_OT_copy_icon_name(bpy.types.Operator):
         self.report({'INFO'}, f'Iconname "{self.icon_name}" kopiert!')
         return {'FINISHED'}
 
+
+class IconNameItem(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty()
+
+class ICONS_UL_icon_list(bpy.types.UIList):
+    def draw_filter(self, context, layout):
+        layout.prop(self, "filter_name", text="Filter", icon='VIEWZOOM')
+
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            row = layout.row(align=True)
+            op = row.operator("wm.copy_icon_name", text=item.name, icon=item.name)
+            op.icon_name = item.name
+        elif self.layout_type in {'GRID'}:
+            layout.label(text="", icon=item.name)
+
+class ICONS_OT_init_icon_list(bpy.types.Operator):
+    bl_idname = "wm.init_icon_list"
+    bl_label = "Icon-Liste initialisieren"
+    def execute(self, context):
+        items = context.scene.icon_name_items
+        items.clear()
+        for name in ICON_NAMES:
+            item = items.add()
+            item.name = name
+        self.report({'INFO'}, "Icon-Liste initialisiert!")
+        return {'FINISHED'}
+
 class ICONS_PT_menu(bpy.types.Panel):
     bl_label = "Blender Icons Übersicht"
     bl_idname = "ICONS_PT_menu"
@@ -32,15 +60,41 @@ class ICONS_PT_menu(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        for icon_name in ICON_NAMES:
-            row = layout.row(align=True)
-            op = row.operator("wm.copy_icon_name", text=icon_name, icon=icon_name)
-            op.icon_name = icon_name
+        # Button anzeigen, wenn Liste leer ist
+        if len(context.scene.icon_name_items) == 0:
+            layout.operator("wm.init_icon_list", icon='FILE_REFRESH')
+            return
+        box = layout.box()
+        box.label(text="Icon Browser", icon='VIEWZOOM')
+        row = box.row()
+        row.template_list("ICONS_UL_icon_list", "", context.scene, "icon_name_items", context.scene, "icon_name_index", rows=15, type='DEFAULT', sort_lock=False)
+
+def ensure_icon_items(scene):
+    items = scene.icon_name_items
+    if len(items) != len(ICON_NAMES):
+        items.clear()
+        for name in ICON_NAMES:
+            item = items.add()
+            item.name = name
+
+def on_scene_update(scene):
+    ensure_icon_items(scene)
+
 
 def register():
+    bpy.utils.register_class(IconNameItem)
+    bpy.utils.register_class(ICONS_UL_icon_list)
     bpy.utils.register_class(ICONS_OT_copy_icon_name)
+    bpy.utils.register_class(ICONS_OT_init_icon_list)
     bpy.utils.register_class(ICONS_PT_menu)
+    bpy.types.Scene.icon_name_items = bpy.props.CollectionProperty(type=IconNameItem)
+    bpy.types.Scene.icon_name_index = bpy.props.IntProperty(name="Icon Index", default=0)
 
 def unregister():
+    bpy.utils.unregister_class(IconNameItem)
+    bpy.utils.unregister_class(ICONS_UL_icon_list)
     bpy.utils.unregister_class(ICONS_OT_copy_icon_name)
+    bpy.utils.unregister_class(ICONS_OT_init_icon_list)
     bpy.utils.unregister_class(ICONS_PT_menu)
+    del bpy.types.Scene.icon_name_items
+    del bpy.types.Scene.icon_name_index
