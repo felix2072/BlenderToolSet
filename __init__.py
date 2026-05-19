@@ -16,3 +16,4 @@ def register():
 
 def unregister():
     icon_menu.unregister()
+    

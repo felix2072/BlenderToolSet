@@ -16,11 +16,13 @@ class ICONS_OT_copy_icon_name(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            subprocess.run(['cmd.exe', '/c', f'echo {self.icon_name.strip()}| clip'], check=True)
+            trimmed = self.icon_name.strip()
+            # echo ohne Zeilenumbruch: nutze powershell
+            subprocess.run(['powershell', '-command', f'Set-Clipboard -Value "{trimmed}"'], check=True)
         except Exception as e:
             self.report({'ERROR'}, f'Clipboard Error: {e}')
             return {'CANCELLED'}
-        self.report({'INFO'}, f'Iconname "{self.icon_name}" kopiert!')
+        self.report({'INFO'}, f'Iconname "{trimmed}" kopiert!')
         return {'FINISHED'}
 
 
