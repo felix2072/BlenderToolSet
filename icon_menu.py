@@ -16,9 +16,6 @@ ICON_NAMES = load_icon_names()
 import subprocess
 
 class ICONS_UL_icon_list(bpy.types.UIList):
-    def draw_filter(self, context, layout):
-        layout.prop(self, "filter_name", text="Filter", icon='VIEWZOOM')
-
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             row = layout.row(align=True)
