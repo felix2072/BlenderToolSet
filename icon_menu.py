@@ -1,3 +1,5 @@
+import cmd
+
 import bpy
 
 # Liste der Icon-Namen aus icon.csv
@@ -16,9 +18,13 @@ class ICONS_OT_copy_icon_name(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            trimmed = self.icon_name.strip()
-            # echo ohne Zeilenumbruch: nutze powershell
-            subprocess.run(['powershell', '-command', f'Set-Clipboard -Value "{trimmed}"'], check=True)
+            trimmed = self.icon_name.rstrip('\n')
+            cmd ='echo '+ trimmed +'|clip'
+            subprocess.run(
+                ["clip"],
+                input=trimmed.encode("utf-16le"),
+                check=True
+            )
         except Exception as e:
             self.report({'ERROR'}, f'Clipboard Error: {e}')
             return {'CANCELLED'}
