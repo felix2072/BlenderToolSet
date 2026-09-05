@@ -1,3 +1,4 @@
+from . import delete_hierarchy
 from . import icon_menu
 
 bl_info = {
@@ -12,7 +13,9 @@ bl_info = {
 
 def register():
     icon_menu.register()
+    delete_hierarchy.register()
 
 
 def unregister():
+    delete_hierarchy.unregister()
     icon_menu.unregister()
